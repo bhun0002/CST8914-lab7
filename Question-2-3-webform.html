@@ -31,7 +31,10 @@
                 margin: 0;
             }
     
-           
+            input[type="checkbox"] + label + .error {
+    display: block; /* Ensure the error message appears on a new line */
+    margin-top: 5px;
+}
         </style>
     </head>
     <body>
@@ -43,26 +46,29 @@
         <label for="name">Full name <span class="required">*</span></label>
         <input id="name" name="name" type="text" aria-required="true" aria-describedby="name-instructions"/>
         <!-- Inline instructions for screen readers -->
-        <span id="name-instructions" class="sr-only">Your full name is required.</span>
+       
       </div>
       <div class="control">
         <label for="biography">Biography <span class="required">*</span></label>
         <textarea id="biography" name="biography" aria-describedby="biography-instructions"></textarea>
-        <span id="biography-instructions">Include examples of your skills in JavaScript.</span>
       </div>
       <!-- Added fieldset and legend for grouping radio buttons -->
+   
       <fieldset>
         <legend>Gender <span class="required">*</span></legend>
         <div class="control">
+            <label for="gender_male">Male</label>
           <input id="gender_male" name="gender" type="radio" value="male" aria-describedby="gender-instructions"/>
-          <label for="gender_male">Male</label>
+       
         </div>
         <div class="control">
+            <label for="gender_female">Female</label>
           <input id="gender_female" name="gender" type="radio" value="female" aria-describedby="gender-instructions"/>
-          <label for="gender_female">Female</label>
+         
         </div>
-        <!-- Inline instructions for screen readers -->
-        <span id="gender-instructions" class="sr-only">Please select your gender.</span>
+       <!-- Common error message for the gender group -->
+    <span id="gender-error" class="error"></span>
+       
       </fieldset>
         
       <div class="control">
@@ -77,106 +83,135 @@
      
       
           <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-          <script> (function () {
-            var validateInput;
-          
-            $.urlParam = function (name) {
-              var results;
-              results = new RegExp('[?&]' + name + '=([^&#]*)').exec(window.location.href);
-          
-              if (results === null) {
-                return null;
-              } else {
-                return decodeURI(results[1]) || null;
-              }
-            };
-          
-            validateInput = function validateInput(input, message) {
-              var $elementToDescribe, $error, $errorContainer, $fieldset, $input, $referencedElement, value;
-              $input = $('[name="' + input + '"]');
-          
-              if ((value = $.urlParam(input)) === null) {
-                if ($('fieldset.errors').length === 0) {
-                  $('form').prepend('<fieldset class="errors"><legend>Errors</legend><ul></ul></fieldset>');
-                }
-          
-                $referencedElement = null;
-                $elementToDescribe = null;
-                $errorContainer = $('fieldset.errors ul');
-          
-                if ($input.is(':radio')) {
-                  $fieldset = $input.closest('fieldset');
-                  $elementToDescribe = $fieldset;
-                  $referencedElement = $input.filter(':first');
-                } else {
-                  $elementToDescribe = $input;
-                  $referencedElement = $input;
-                }
-          // R.G. hint: fix next line ;)
-                $error = $('<a href="#">' + message + '</a>'); // Added href="#" for screen reader users
-                $error.click(function (e) {
-                      // Added delay to ensure focus works in all browsers, including IE11
-                       setTimeout(function () {
-                         $referencedElement.focus(); // Focus on the input element with the error
-                         }, 50); // Delay of 50 milliseconds to handle focus properly
-                     return e.preventDefault();
-                });
-    
-                $elementToDescribe.attr('aria-describedby', input + '_description');
-                $errorContainer.append('<li>').find('li:last').append($error);
-          
-                  if ($(':not(form):focus').length === 0) {
-        // Focus logic for non-form elements if needed
-    
-        // Find the first focusable non-form element (like div, span) with tabindex
-        var $focusableNonFormElement = $(':not(form)[tabindex]').first();
-    
-        if ($focusableNonFormElement.length) {
-            // If such an element exists, move focus to it
-            setTimeout(function () {
-                $focusableNonFormElement.focus(); // Focus on the non-form element
-            }, 50); // Add a delay for better compatibility with browsers like IE11
-        }
-    }
-    
-              } else {
-                if ($input.is(':checkbox')) {
-                  $input.attr('checked', true);
-                }
-          
-                if ($input.is(':radio')) {
-                  return $input.filter('[value="' + value + '"]').attr('checked', true);
-                } else {
-                  return $input.val(value);
-                }
-              }
-            };
-          
-            $(document).ready(function () {
-        $('#registerButton').click(function (e) {
-          e.preventDefault(); // Prevent form submission
-    
-          // Clear previous error summary
-          $('div.error-summary').remove();
-    
-          // Validate inputs
-          validateInput('name', 'Please enter your name!');
-          validateInput('biography', 'Please tell us something about your history!');
-          validateInput('gender_male', 'Please tell us your gender!');
-          validateInput('accept_agbs', 'You must accept our terms and conditions!');
-    
-          // If no errors are present, display success message
-          if ($('.error').length === 0) {
-            alert('All inputs are valid.');
-          }
+          <script>
+    $(document).ready(function () {
+        // Attach event listeners to inputs
+        $('#name').on('input', function () {
+            validateInput('name', 'Please enter your name!');
         });
-      });
 
-      
-    })();
-    
-   
-    </script>
+        $('#biography').on('input', function () {
+            validateInput('biography', 'Please tell us something about your history!');
+        });
+
+        $('input[name="gender"]').on('change', function () {
+            validateInput('gender', 'Please select your gender!');
+        });
+
+        $('#accept_agbs').on('change', function () {
+            validateInput('accept_agbs', 'You must accept our terms and conditions!');
+        });
+
+        $('#registerButton').click(function (e) {
+            e.preventDefault(); // Prevent form submission
+
+            // Clear previous error summary
+            $('fieldset.errors').remove();
+
+            // Validate inputs
+            var isFormValid = true;
+            if (!validateInput('name', 'Please enter your name!')) isFormValid = false;
+            if (!validateInput('biography', 'Please tell us something about your history!')) isFormValid = false;
+            if (!validateInput('gender', 'Please select your gender!')) isFormValid = false;
+            if (!validateInput('accept_agbs', 'You must accept our terms and conditions!')) isFormValid = false;
+
+            // If no errors are present, display success message
+            if (isFormValid) {
+                alert('All inputs are valid.');
+            }
+        });
+
+        // Handle focus when error links are clicked
+        $('form').on('click', 'a', function (e) {
+            e.preventDefault(); // Prevent default anchor behavior
+
+            var target = $(this).attr('href').substring(1); // Get the target id
+            var $targetElement = $('#' + target); // Get the element by id
+
+            // Set focus on the corresponding input
+            if ($targetElement.length) {
+                $targetElement.focus();
+            } else if (target === 'gender') {
+                // If it's for gender, focus on the first radio button
+                $('input[name="gender"]').first().focus();
+            }
+        });
+    });
+
+    // Validation function
+    validateInput = function (input, message) {
+        var $input = $('[name="' + input + '"]');
+        var isValid = true; // Assume input is valid initially
+
+        // Clear previous error messages for non-gender and non-checkbox inputs
+        if (input !== 'gender' && input !== 'accept_agbs') {
+            $input.removeClass('invalid');
+            $input.next('.error').remove(); // Remove previous error message
+        }
+
+        // Check if the input is valid
+        if (input === 'gender' && !$('[name="gender"]:checked').length) {
+            isValid = false;
+        } else if (input === 'accept_agbs' && !$input.is(':checked')) {
+            isValid = false;
+        } else if ($input.val().trim() === "") {
+            isValid = false;
+        }
+
+        // If the input is invalid, display an error message
+        if (!isValid) {
+            var $errorContainer = $('fieldset.errors ul');
+            if ($errorContainer.length === 0) {
+                $('form').prepend('<fieldset class="errors"><legend>Errors</legend><ul></ul></fieldset>');
+                $errorContainer = $('fieldset.errors ul');
+            }
+
+            // Add error message in the summary if it's not already present
+            if (!$errorContainer.find('a[href="#' + input + '"]').length) {
+                $errorContainer.append('<li><a href="#' + input + '">' + message + '</a></li>');
+            }
+
+            // Handle the gender group separately
+            if (input === 'gender') {
+                var $lastRadio = $('[name="gender"]').last();
+                if (!$lastRadio.next('.error').length) {
+                    $lastRadio.after('<span class="error">Error: ' + message + '</span>'); // Show error after the last radio button
+                }
+            }
+            // Handle the checkbox input separately
+            else if (input === 'accept_agbs' && !$input.next('.error').length) {
+                $input.addClass('invalid');
+                $input.next('label').after('<span class="error">Error: ' + message + '</span>'); // Show error after the label
+            }
+            // Handle other inputs
+            else if (input !== 'gender' && !$input.next('.error').length) {
+                $input.addClass('invalid'); // Add error class to the input
+                $input.after('<span class="error">Error: ' + message + '</span>'); // Show error message
+            }
+
+            return false;
+        } else {
+            // Remove the error from the error summary if the input is valid
+            $('fieldset.errors ul li a[href="#' + input + '"]').closest('li').remove();
+            if ($('fieldset.errors ul li').length === 0) {
+                $('fieldset.errors').remove(); // Remove the entire error summary if there are no more errors
+            }
+
+            // Remove individual input errors
+            if (input !== 'gender' && input !== 'accept_agbs') {
+                $input.removeClass('invalid');
+                $input.next('.error').remove();
+            } else if (input === 'gender') {
+                $('[name="gender"]').last().next('.error').remove(); // Remove the gender error message
+            } else if (input === 'accept_agbs') {
+                $input.next('label').next('.error').remove(); // Remove the checkbox error message
+            }
+        }
+
+        return true;
+    };
+</script>
+
                 
         </body>
       </html>
