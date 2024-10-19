@@ -7,7 +7,17 @@
             .control, fieldset {
                 margin: 6px 0;
             }
-    
+            .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap; /* Ensures the content is not shown even if it's long */
+  border: 0;
+}
             label {
                 display: inline-block;
                 width: 120px;
@@ -46,14 +56,16 @@
         <label for="name">Full name <span class="required">*</span></label>
         <input id="name" name="name" type="text" aria-required="true" aria-describedby="name-instructions"/>
         <!-- Inline instructions for screen readers -->
-       
+        <span id="name-instructions" class="sr-only">Please enter your full name. This field is required.</span>
       </div>
       <div class="control">
         <label for="biography">Biography <span class="required">*</span></label>
         <textarea id="biography" name="biography" aria-describedby="biography-instructions"></textarea>
+        <!-- Inline instructions for screen readers -->
+    <span id="biography-instructions" class="sr-only">Include examples of your skills in JavaScript. This field is required.</span>
       </div>
+
       <!-- Added fieldset and legend for grouping radio buttons -->
-   
       <fieldset>
         <legend>Gender <span class="required">*</span></legend>
         <div class="control">
@@ -66,19 +78,25 @@
           <input id="gender_female" name="gender" type="radio" value="female" aria-describedby="gender-instructions"/>
          
         </div>
+        <!-- Inline instructions for screen readers for the gender field -->
+    <span id="gender-instructions" class="sr-only">Please select your gender. This field is required.</span>
        <!-- Common error message for the gender group -->
     <span id="gender-error" class="error"></span>
        
       </fieldset>
         
       <div class="control">
-        <input id="accept_agbs" name="accept_agbs" type="checkbox" value="1" aria-required="true" />
+        <input id="accept_agbs" name="accept_agbs" type="checkbox" value="1" aria-required="true" aria-describedby="terms-instructions"/>
         <label for="accept_agbs"><span class="required">*</span> I accept the terms and conditions </label>
+        <!-- Inline instructions for screen readers -->
+    <span id="terms-instructions" class="sr-only">You must accept the terms and conditions before submitting the form.</span>
       </div>
         
       <div class="control">
-        <button id="registerButton">Submit feedback</button>
-      </div>
+    <button id="registerButton" aria-describedby="button-instructions">Register</button>
+    <!-- Inline instructions for screen readers for the button -->
+    <span id="button-instructions" class="sr-only">Submit the form after filling in all required fields.</span>
+  </div>
     </form>
      
       
